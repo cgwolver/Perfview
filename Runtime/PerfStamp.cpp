@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <time.h>
 #include <string.h>
+#include "PathUtil.h"
 
 PerfSampler PerfSampler::_Instance;
 
@@ -185,7 +186,7 @@ void PerfSampler::_initStreamFile(PerfContext_t*Ctx)
 		const char* stm = ctime(&t);
 		struct tm * tt = localtime(&t);
 		char name[512] = "";
-		sprintf(name, "%s-(%d)-%d-%02d-%02d-%02d-%02d-%02d", _Filename.c_str(), Ctx->Id, 1900 + tt->tm_year, tt->tm_mon + 1, tt->tm_mday, tt->tm_hour, tt->tm_min, tt->tm_sec);
+		sprintf_safe(name,512,"%s-(%d)-%d-%02d-%02d-%02d-%02d-%02d", _Filename.c_str(), Ctx->Id, 1900 + tt->tm_year, tt->tm_mon + 1, tt->tm_mday, tt->tm_hour, tt->tm_min, tt->tm_sec);
 	
 		Ctx->_fpStream = fopen(name, "wb");
 	}

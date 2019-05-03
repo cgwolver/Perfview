@@ -20,7 +20,6 @@ public:
 	void updateStatusBar(int iFrame,int cFrames);
 	void updateTreeWidget(int iFrame, int cFrames);
 	QTreeWidgetItem* onSetLabel(QTreeWidgetItem* item, QString strLabel);
-	void reset();
 private slots:
     void on_actionOpen_triggered();
 

@@ -19,7 +19,6 @@ public:
 	int currentFrame();
 	void setCurrentFrame(int iFrame);
 	void drawFrame(QPainter& rPainter,  QPen& pen, QLine&rLine, int i, int iFrame, unsigned long long msec);
-	void reset();
 protected:
 	int _curFrame;
 	int _dispStart;

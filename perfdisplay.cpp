@@ -46,16 +46,6 @@ void PerfDisplay :: setLabel(QString label)
 {
 	_label = label;
 }
-void PerfDisplay::reset()
-{
-	QPainter painter(this);
-	QPen& pen = const_cast<QPen&>(painter.pen());
-	QRect rcClient = rect();
-	QPoint pt = rcClient.bottomRight();
-	pt = pt - QPoint(1, 1);
-	rcClient.setBottomRight(pt);
-	painter.drawRect(rcClient);
-}
 void PerfDisplay::drawFrame(QPainter& rPainter, QPen& pen, QLine&rLine, int i, int iFrame, unsigned long long msec)
 {
 	QLine line2;

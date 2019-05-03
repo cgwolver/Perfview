@@ -59,7 +59,6 @@ public:
 	std::vector<SampleBracket_t>& sampleBrackets(){ return _PerfStampBrackets; }
 	std::map<unsigned int, std::string>& strMaps(){ return _strMaps; }
 	std::vector<PerfStampData_t>& samples(){ return _PerfStampBuf; }
-	void reset();
 	unsigned long long frameTime(int iFrame);
 	unsigned long long frameLabelTime(int iFrame, QString strLabel, int &oCount);
 	const char* cstr(unsigned int key)

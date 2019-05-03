@@ -22,13 +22,6 @@ unsigned long long PerfData::frameTime(int iFrame)
 	unsigned long long dt = t2 - t1;
 	return dt;
 }
-void PerfData::reset()
-{
-	_strMaps.clear();
-	_PerfStampBuf.clear();
-	_PerfStampBrackets.clear();
-	_frameTimes.clear();
-}
 unsigned long long PerfData::frameLabelTime(int iFrame, QString strLabel,int &oCount)
 {
 	TimeRange_t &frame = _frameTimes[iFrame];

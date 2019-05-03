@@ -97,20 +97,10 @@ void MainWindow::on_actionExit_triggered()
 {
     qApp->exit();
 }
-void MainWindow::reset()
-{
 
-	PerfData* perf = PerfData::instance();
-
-	perf->reset();
-
-	ui->treeWidget->clear();
-
-}
 
 void MainWindow::load(QString fileName)
 {
-	reset();
 	QFile file(fileName);
 	if (!file.open(QIODevice::ReadOnly))
 		return;
@@ -119,7 +109,7 @@ void MainWindow::load(QString fileName)
 
 	ui->view->setLabel("Frame");
 	PerfData* perf = PerfData::instance();
-	
+
 	std::map<unsigned int, std::string>& strMaps = perf->strMaps();
 	std::vector<PerfStampData_t>& samples = perf->samples();
 	std::vector<TimeRange_t>& frameTimes = perf->frameTimes();
@@ -224,6 +214,7 @@ void MainWindow::load(QString fileName)
 				{
 					brackets[i].type = 2;
 
+
 					if (bFrameStart)
 					{
 						assert(iFrameIndex > 0);
@@ -235,19 +226,20 @@ void MainWindow::load(QString fileName)
 						brackets[i].sampleIndex = tm.sampleIndex1;
 						brackets[tm.sampleIndex1].sampleIndex = i;
 					}
+
 					
 				}
+
+
 			}
 		}
 		////////////////////////////////////////////////////////////////////
 		bFrameStart = false;
 		iFrameIndex = 0;
-
-		bool bSkipFrame = false;
-		QTreeWidgetItem* itemCurrFrame = nullptr;
-		for (int iSamp = 0; iSamp<sampleCount; iSamp++)
+		
+		for (int i = 0; i<sampleCount; i++)
 		{
-			PerfStampData_t& sampleData = samples[iSamp];
+			PerfStampData_t& sampleData = samples[i];
 			PerfStamp_t & sample = sampleData.stamp;
 			unsigned int addr = (unsigned int)sample.File;
 			auto kItor = strMaps.find(addr);
@@ -286,8 +278,6 @@ void MainWindow::load(QString fileName)
 			unsigned short Type = 0x00ff & sample.Type;
 			unsigned short Tag = 0xff00 & sample.Type;
 
-		
-
 			if (strcmp(str, "Frame") == 0)
 			{
 				if (Type == 1)
@@ -297,7 +287,7 @@ void MainWindow::load(QString fileName)
 
 					if (bFrameStart)
 					{
-						brackets[iSamp].type = 1;
+						brackets[i].type = 1;
 						iFrameIndex++;
 						char buf[256];
 
@@ -309,9 +299,8 @@ void MainWindow::load(QString fileName)
 						
                         labels.insert("Frame");
 						item->setText(COL_LABEL, buf);
-						itemCurrFrame = item;
 						ui->treeWidget->addTopLevelItem(item);
-						bSkipFrame = false;
+
 					}
 					
 				}
@@ -345,22 +334,15 @@ void MainWindow::load(QString fileName)
 						
 						item->setText(COL_PERCENT, "100");
 						item = nullptr;
-						bSkipFrame = false;
 					}				
 				}
 			}
+
 			else if (bFrameStart && iFrameIndex>0)
 			{
-				if (bSkipFrame)
-				{
-					bFrameStart = false;
-					item = nullptr;
-					continue;
-				}
 				if (!item)
 					continue;
 				TimeRange_t& tm = frameTimes[iFrameIndex - 1];
-
 				if (Type == 3)
 				{
 					QTreeWidgetItem* childItem = new QTreeWidgetItem();
@@ -369,7 +351,6 @@ void MainWindow::load(QString fileName)
 					sprintf(buf, "%s", str);
 					childItem->setText(COL_LABEL, buf);
 					labels.insert(str);
-
 
 					item->addChild(childItem);
 
@@ -416,14 +397,14 @@ void MainWindow::load(QString fileName)
 				else if (Type == 1)
 				{
 					QTreeWidgetItem* childItem = new QTreeWidgetItem();
-					brackets[iSamp].type = 1;
+					brackets[i].type = 1;
 					char buf[256];
 					sprintf(buf, "%s", str);
 					childItem->setText(COL_LABEL, buf);
                     labels.insert(str);
 					
 					item->addChild(childItem);
-					labIndex[childItem] = iSamp;
+					labIndex[childItem] = i;
 					item = childItem;
 				}
 				else if (Type == 2)
@@ -431,7 +412,6 @@ void MainWindow::load(QString fileName)
 
 					QString text = item->text(COL_LABEL);
 					QString text1 = str;
-
 					if (text.compare(text1)!=0)
 					{
 						//QObject* obj = ui->treeWidget->parent();
@@ -440,7 +420,7 @@ void MainWindow::load(QString fileName)
 							ErrorDialog ed;
 
 
-                           QString str = QString("labels aren't match: the current is <%1>,the before is <%2>")
+                           QString str = QString("labels aren'tmatch: the current is <%1>,the before is <%2>")
                                      .arg(text)
                                      .arg(text1);
 
@@ -457,23 +437,9 @@ void MainWindow::load(QString fileName)
 							{
 								bDisplayError = false;
 							}
-							
-
 						}
 					
-						int cc = itemCurrFrame->columnCount();
-						for (int j = 0; j < cc; j++)
-						{
-							itemCurrFrame->setTextColor(j, Qt::red);
-						}
-						QTreeWidgetItem* it = item;
-						while (it)
-						{
-							it->setTextColor(0, Qt::red);
-							it = it->parent();
-						}
 						//msbx.exec();
-						bSkipFrame = true;
 					}
 					auto kItor = labIndex.find(item);
 					assert(kItor != labIndex.end());
@@ -481,9 +447,9 @@ void MainWindow::load(QString fileName)
 					PerfStamp_t& st1 = samples[idx].stamp;
 					PerfStamp_t& st2 = sample;
 
-					brackets[iSamp].type = 2;
-					brackets[iSamp].sampleIndex = idx;
-					brackets[idx].sampleIndex = iSamp;
+					brackets[i].type = 2;
+					brackets[i].sampleIndex = idx;
+					brackets[idx].sampleIndex = i;
 
 					std::string file = strMaps[st2.File];
 					std::string func = strMaps[st2.Func];
@@ -544,47 +510,6 @@ void MainWindow::load(QString fileName)
 
 					item = item->parent();
 
-				}
-				else
-				{
-					if (bDisplayError)
-					{
-						ErrorDialog ed;
-
-						QString text = item->text(COL_LABEL);
-						QString text1 = str;
-						QString str = QString("invaild label type:%d: the current is <%1>,the before is <%2>")
-							.arg(Type)
-							.arg(text)
-							.arg(text1);
-
-
-						ed.setErrorText(str);
-						ed.copyTreeWidget(ui->treeWidget);
-						int ret = ed.exec();
-
-						if (ret == QDialog::Accepted)
-						{
-
-						}
-						else
-						{
-							bDisplayError = false;
-						}
-						int cc = itemCurrFrame->columnCount();
-						for (int j = 0; j < cc; j++)
-						{
-							itemCurrFrame->setTextColor(j, Qt::red);
-						}
-						QTreeWidgetItem* it = item;
-						while (it)
-						{
-							it->setTextColor(0, Qt::red);
-							it = it->parent();
-						}
-					}
-
-					bSkipFrame = true;
 				}
 			}
 			
